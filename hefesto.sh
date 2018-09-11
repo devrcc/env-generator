@@ -1,7 +1,7 @@
 #!/bin/bash
 # Script to add a user to Linux system
 if [ $(id -u) -eq 0 ]; then
-	read -p "Enter username : " username
+	read -p "Ingrese el nombre de usuario: " username
 	egrep "^$username" /etc/passwd >/dev/null
 	if [ $? -eq 0 ]; then
 		echo "El usuario [$username] existe"
@@ -9,8 +9,29 @@ if [ $(id -u) -eq 0 ]; then
 	else
 		pass=$(perl -e 'print crypt($ARGV[0], "password")' $password)
 		useradd -m -p "654321" $username -g www-data
-		mkhomedir_helper $username
-		[ $? -eq 0 ] && echo "El usuario se ha creado" || echo "Error al crear el usuario"
+		# mkhomedir_helper $username
+		mkdir "/vagrant/html/$username"
+		mkdir "/vagrant/html/$username/public_html"
+		ln -s "/vagrant/html/$username/public_html" "/home/$username"
+
+		cat <<-EOF > /etc/apache2/sites-available/$username.site.conf
+		<VirtualHost *:80>        
+	        ServerName $username.site
+	        ServerAdmin webmaster@localhost
+	        DocumentRoot /home/$username/public_html
+
+	        <Directory /home/$username/public_html>
+	            Options Indexes FollowSymLinks MultiViews
+	            AllowOverride All
+	            Require all granted
+	        </Directory>
+		</VirtualHost>
+		EOF
+
+		a2ensite $username.site.conf
+		service apache2 restart
+
+		[ $? -eq 0 ] && echo "Se ha creado el entorno $username.site" || echo "Error al crear el entorno"
 	fi
 else
 	echo "Únicamente se puede ejecutar con permisos de root"
