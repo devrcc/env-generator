@@ -4,6 +4,7 @@ if [ $(id -u) -eq 0 ]; then
 	read -p "Ingrese el nombre de usuario: " username
 	egrep "^$username" /etc/passwd >/dev/null
 	if [ $? -eq 0 ]; then
+		echo "DROP DATABASE db_$username; DROP USER '$username'@'localhost';" | mysql -u root -p		
 		sudo a2dissite $username.site.conf
 		service apache2 restart
 		userdel -r $username

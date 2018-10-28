@@ -8,7 +8,7 @@ if [ $(id -u) -eq 0 ]; then
 		exit 1
 	else
 		pass=$(perl -e 'print crypt($ARGV[0], "password")' $password)
-		useradd -m -p "654321" $username -g www-data
+		useradd -m -p "$pass" $username -g www-data
 		# mkhomedir_helper $username
 		mkdir "/vagrant/html/$username"
 		mkdir "/vagrant/html/$username/public_html"
@@ -31,7 +31,9 @@ if [ $(id -u) -eq 0 ]; then
 		a2ensite $username.site.conf
 		service apache2 restart
 
-		[ $? -eq 0 ] && echo "Se ha creado el entorno $username.site" || echo "Error al crear el entorno"
+		echo "CREATE DATABASE db_$username; GRANT ALL PRIVILEGES ON db_$username.* TO $username@localhost IDENTIFIED BY '$pass'" | mysql -u root -p
+
+		[ $? -eq 0 ] && echo "Se ha creado el entorno para $username, la contraseña es: $pass" || echo "Error al crear el entorno"
 	fi
 else
 	echo "Únicamente se puede ejecutar con permisos de root"
