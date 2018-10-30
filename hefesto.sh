@@ -2,6 +2,7 @@
 # Script to add a user to Linux system
 if [ $(id -u) -eq 0 ]; then
 	read -p "Ingrese el nombre de usuario: " username
+	read -p "Ingrese la contraseña: " password
 	egrep "^$username" /etc/passwd >/dev/null
 	if [ $? -eq 0 ]; then
 		echo "El usuario [$username] existe"
@@ -31,9 +32,9 @@ if [ $(id -u) -eq 0 ]; then
 		a2ensite $username.site.conf
 		service apache2 restart
 
-		echo "CREATE DATABASE db_$username; GRANT ALL PRIVILEGES ON db_$username.* TO $username@localhost IDENTIFIED BY '$pass'" | mysql -u root -p
+		echo "CREATE DATABASE db_$username; GRANT ALL PRIVILEGES ON db_$username.* TO $username@localhost IDENTIFIED BY '$password'" | mysql -u root -p
 
-		[ $? -eq 0 ] && echo "Se ha creado el entorno para $username, la contraseña es: $pass" || echo "Error al crear el entorno"
+		[ $? -eq 0 ] && echo "Se ha creado el entorno para $username [$username.site]" || echo "Error al crear el entorno"
 	fi
 else
 	echo "Únicamente se puede ejecutar con permisos de root"
