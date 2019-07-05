@@ -12,14 +12,19 @@ if [ $(id -u) -eq 0 ]; then
 		useradd -m -p "$pass" $username -g www-data
 		# mkhomedir_helper $username
 		mkdir "/vagrant/html/$username"
+		mkdir "/vagrant/html/$username/logs"
 		mkdir "/vagrant/html/$username/public_html"
 		ln -s "/vagrant/html/$username/public_html" "/home/$username"
+		ln -s "/vagrant/html/$username/logs" "/home/$username/logs"
 
 		cat <<-EOF > /etc/apache2/sites-available/$username.site.conf
 		<VirtualHost *:80>        
 	        ServerName $username.site
 	        ServerAdmin webmaster@localhost
 	        DocumentRoot /home/$username/public_html
+
+	        ErrorLog /home/$username/logs/error.log
+        	CustomLog /home/$username/logs/access.log combined
 
 	        <Directory /home/$username/public_html>
 	            Options Indexes FollowSymLinks MultiViews
