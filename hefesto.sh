@@ -13,20 +13,20 @@ if [ $(id -u) -eq 0 ]; then
 		# mkhomedir_helper $username
 		mkdir "/vagrant/html/$username"
 		mkdir "/vagrant/html/$username/logs"
-		mkdir "/vagrant/html/$username/public_html"
-		ln -s "/vagrant/html/$username/public_html" "/home/$username"
+		mkdir "/vagrant/html/$username/content"
+		ln -s "/vagrant/html/$username/content" "/home/$username"
 		ln -s "/vagrant/html/$username/logs" "/home/$username/logs"
 
 		cat <<-EOF > /etc/apache2/sites-available/$username.site.conf
 		<VirtualHost *:80>        
 	        ServerName $username.site
 	        ServerAdmin webmaster@localhost
-	        DocumentRoot /home/$username/public_html
+	        DocumentRoot /home/$username/content
 
 	        ErrorLog /home/$username/logs/error.log
         	CustomLog /home/$username/logs/access.log combined
 
-	        <Directory /home/$username/public_html>
+	        <Directory /home/$username/content>
 	            Options Indexes FollowSymLinks MultiViews
 	            AllowOverride All
 	            Require all granted
