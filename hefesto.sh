@@ -1,6 +1,7 @@
 #!/bin/bash
 # Script to add a user to Linux system
 if [ $(id -u) -eq 0 ]; then
+	read -p "Tipo de entorno: [1] Local [2] Produccion " enviroment
 	read -p "Ingrese el nombre de usuario: " username
 	read -p "Ingrese la contraseña: " password
 	egrep "^$username" /etc/passwd >/dev/null
@@ -10,21 +11,31 @@ if [ $(id -u) -eq 0 ]; then
 	else
 		pass=$(perl -e 'print crypt($ARGV[0], "password")' $password)
 		useradd -m -p "$pass" $username -g www-data
-		# mkhomedir_helper $username
-		mkdir "/vagrant/html/$username"
-		mkdir "/vagrant/html/$username/logs"
-		mkdir "/vagrant/html/$username/content"
-		ln -s "/vagrant/html/$username/content" "/home/$username"
-		ln -s "/vagrant/html/$username/logs" "/home/$username/logs"
 
-		cat <<-EOF > /etc/apache2/sites-available/$username.site.conf
+		namedb="$username"
+		case $enviroment in
+			1)			
+				mkdir "/vagrant/html/$username"
+				mkdir "/vagrant/html/$username/content"
+				ln -s "/vagrant/html/$username/content" "/home/$username"
+				username="$username.site"
+			;;
+
+			*)
+				echo "Opción no encontrada"
+			;;
+		esac
+
+		apache_log_dir="/var/log/apache2"
+
+		cat <<-EOF > /etc/apache2/sites-available/$username.conf
 		<VirtualHost *:80>        
-	        ServerName $username.site
+	        ServerName $username
 	        ServerAdmin webmaster@localhost
 	        DocumentRoot /home/$username/content
 
-	        ErrorLog /home/$username/logs/error.log
-        	CustomLog /home/$username/logs/access.log combined
+	        ErrorLog $apache_log_dir/$username.error.log
+        	CustomLog $apache_log_dir/$username.access.log combined
 
 	        <Directory /home/$username/content>
 	            Options Indexes FollowSymLinks MultiViews
@@ -34,12 +45,12 @@ if [ $(id -u) -eq 0 ]; then
 		</VirtualHost>
 		EOF
 
-		a2ensite $username.site.conf
+		a2ensite $username.conf
 		service apache2 restart
 
-		echo "CREATE DATABASE db_$username; GRANT ALL PRIVILEGES ON db_$username.* TO $username@localhost IDENTIFIED BY '$password'" | mysql -u root -p
+		echo "CREATE DATABASE db_$namedb; GRANT ALL PRIVILEGES ON db_$namedb.* TO $namedb@localhost IDENTIFIED BY '$password'" | mysql -u root -p
 
-		[ $? -eq 0 ] && echo "Se ha creado el entorno para $username [$username.site]" || echo "Error al crear el entorno"
+		[ $? -eq 0 ] && echo "Se ha creado el entorno para $username" || echo "Error al crear el entorno"
 	fi
 else
 	echo "Únicamente se puede ejecutar con permisos de root"
