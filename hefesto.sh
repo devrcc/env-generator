@@ -15,10 +15,15 @@ if [ $(id -u) -eq 0 ]; then
 		namedb="$username"
 		case $enviroment in
 			1)			
+				username="$username.site"
 				mkdir "/vagrant/html/$username"
 				mkdir "/vagrant/html/$username/content"
 				ln -s "/vagrant/html/$username/content" "/home/$username"
-				username="$username.site"
+			;;
+
+			2)
+				read -p "Ingrese el dominio: " domain
+				username="$username.$domain"
 			;;
 
 			*)
