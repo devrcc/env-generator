@@ -15,15 +15,15 @@ if [ $(id -u) -eq 0 ]; then
 		namedb="$username"
 		case $enviroment in
 			1)			
-				username="$username.site"
 				mkdir "/vagrant/html/$username"
 				mkdir "/vagrant/html/$username/content"
 				ln -s "/vagrant/html/$username/content" "/home/$username"
+				username="$username"
+				domain="site"
 			;;
 
 			2)
 				read -p "Ingrese el dominio: " domain
-				username="$username.$domain"
 			;;
 
 			*)
@@ -33,14 +33,14 @@ if [ $(id -u) -eq 0 ]; then
 
 		apache_log_dir="/var/log/apache2"
 
-		cat <<-EOF > /etc/apache2/sites-available/$username.conf
+		cat <<-EOF > /etc/apache2/sites-available/$username.$domain.conf
 		<VirtualHost *:80>        
-	        ServerName $username
+	        ServerName $username.$domain
 	        ServerAdmin webmaster@localhost
 	        DocumentRoot /home/$username/content
 
-	        ErrorLog $apache_log_dir/$username.error.log
-        	CustomLog $apache_log_dir/$username.access.log combined
+	        ErrorLog $apache_log_dir/$username.$domain.error.log
+        	CustomLog $apache_log_dir/$username.$domain.access.log combined
 
 	        <Directory /home/$username/content>
 	            Options Indexes FollowSymLinks MultiViews
@@ -50,7 +50,7 @@ if [ $(id -u) -eq 0 ]; then
 		</VirtualHost>
 		EOF
 
-		a2ensite $username.conf
+		a2ensite $username.$domain.conf
 		service apache2 restart
 
 		echo "CREATE DATABASE db_$namedb; GRANT ALL PRIVILEGES ON db_$namedb.* TO $namedb@localhost IDENTIFIED BY '$password'" | mysql -u root -p

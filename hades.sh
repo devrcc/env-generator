@@ -10,25 +10,25 @@ if [ $(id -u) -eq 0 ]; then
 		userdel -r $username
 		case $enviroment in
 			1)
-				username="$username.site"
+				username="$username"
+				domain="site"
 			;;
 
 			2)
 				read -p "Ingrese el dominio: " domain
-				username="$username.$domain"
 			;;
 
 			*)
 				echo "Opción no encontrada"
 			;;
 		esac
-		sudo a2dissite $username.conf
+		sudo a2dissite $username.$domain.conf
 		service apache2 restart
 		chmod 0777 -R "/vagrant/html/$username"
 		rm -R "/vagrant/html/$username"
-		rm "/etc/apache2/sites-available/$username.conf"
+		rm "/etc/apache2/sites-available/$username.$domain.conf"
 
-		[ $? -eq 0 ] && echo "Se ha eliminado el entorno $username" || echo "Error al eliminar el entorno"
+		[ $? -eq 0 ] && echo "Se ha eliminado el entorno $username.$domain" || echo "Error al eliminar el entorno"
 	else
 		echo "El usuario [$username] no existe"
 		exit 1
