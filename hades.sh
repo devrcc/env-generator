@@ -22,6 +22,9 @@ if [ $(id -u) -eq 0 ]; then
 				echo "Opción no encontrada"
 			;;
 		esac
+		apache_log_dir="/var/log/apache2"		
+		rm "$apache_log_dir/$username.$domain.error.log"
+		rm "$apache_log_dir/$username.$domain.access.log"
 		sudo a2dissite $username.$domain.conf
 		service apache2 restart
 		chmod 0777 -R "/vagrant/html/$username"
