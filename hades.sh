@@ -6,7 +6,7 @@ if [ $(id -u) -eq 0 ]; then
 	egrep "^$username" /etc/passwd >/dev/null
 	if [ $? -eq 0 ]; then
 		namedb="$username"
-		echo "DROP DATABASE db_$username; DROP USER '$username'@'localhost';" | mysql -u root -p		
+		echo "DROP DATABASE db_$username; DROP USER '$username'@'localhost';" | mysql -u root -p
 		userdel -r $username
 		case $enviroment in
 			1)
@@ -22,7 +22,7 @@ if [ $(id -u) -eq 0 ]; then
 				echo "Opción no encontrada"
 			;;
 		esac
-		apache_log_dir="/var/log/apache2"		
+
 		rm "$apache_log_dir/$username.$domain.error.log"
 		rm "$apache_log_dir/$username.$domain.access.log"
 		sudo a2dissite $username.$domain.conf
