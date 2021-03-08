@@ -67,8 +67,8 @@ if [ $(id -u) -eq 0 ]; then
 				SSLCertificateFile $certs_dir/$username.$domain.cert
 				SSLCertificateKeyFile $certs_dir/$username.$domain.key
 
-				ErrorLog $log_dir/$username.$domain.error.log
-				CustomLog $log_dir/$username.$domain.access.log combined
+				ErrorLog $log_dir/error.$username.$domain.log
+				CustomLog $log_dir/access.$username.$domain.log combined
 
 				<Directory /home/$username/$public_html>
 					Options Indexes FollowSymLinks MultiViews
@@ -84,8 +84,8 @@ EOF
 					ServerAdmin webmaster@localhost
 					DocumentRoot /home/$username/$public_html
 
-					ErrorLog $log_dir/$username.$domain.error.log
-					CustomLog $log_dir/$username.$domain.access.log combined
+					ErrorLog $log_dir/error.$username.$domain.log
+					CustomLog $log_dir/access.$username.$domain.log combined
 
 					<Directory /home/$username/$public_html>
 						Options Indexes FollowSymLinks MultiViews
